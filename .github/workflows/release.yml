@@ -31,7 +31,8 @@ jobs:
           echo "Current version is $current_version"
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ steps.new_tag_version.outputs.new_tag }}
-          generate_release_notes: true
+          commit: ${{ github.sha }}
+          tag: ${{ steps.new_tag_version.outputs.new_tag }}
+          generateReleaseNotes: true
