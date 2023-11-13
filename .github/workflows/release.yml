@@ -7,8 +7,9 @@ on:
       - main
 
 jobs:
-  check-package-json-and-create-release:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  create-release:
+    # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: 1 != 1
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -36,3 +37,26 @@ jobs:
           commit: ${{ github.sha }}
           tag: ${{ steps.new_tag_version.outputs.new_tag }}
           generateReleaseNotes: true
+
+  second-step:
+    if: (github.event_name == 'release' && needs.create-tag-release.result == 'skipped') || needs.create-tag-release.result == 'skipped'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Read Node.js version from .nvmrc
+        run: echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_ENV
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install dependencies
+        run: npm ci
+      - name: Check package.json & Add Tag
+        id: new_tag_version
+        run: |
+          current_version=$(node -e "console.log(require('./package.json').version)")
+          echo "new_tag=v$current_version" >> $GITHUB_OUTPUT
+          echo "Current version is $current_version"
