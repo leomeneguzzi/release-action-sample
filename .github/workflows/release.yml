@@ -2,6 +2,8 @@
 name: Create release on main merge
 
 on:
+  release:
+    types: [published]
   push:
     branches:
       - main
